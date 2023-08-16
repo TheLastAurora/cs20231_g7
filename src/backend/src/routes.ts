@@ -15,6 +15,8 @@ routes.post('/usuario/cadastrar', UsuarioController.cadastrar); //retorna o toke
 routes.post('/usuario/login', UsuarioController.login);//retorna o token
 /*----------*/
 routesSecurity.post('/usuario/seInteressar', UsuarioController.seInteresar);
+routesSecurity.post('/usuario/seDesnteressar',UsuarioController.seDesinteressar);
+
 /**********USUSARIO*********/
 
 

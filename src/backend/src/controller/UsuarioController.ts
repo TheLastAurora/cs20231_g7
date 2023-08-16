@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from 'jsonwebtoken';
 import { Environment } from "../config/Environment.js";
 import chalk from "chalk";
+import { Anuncio } from "../entity/Anuncio.js";
 
 
 export interface DadosIniciais {
@@ -31,6 +32,13 @@ export class UsuarioController {
             const {anuncioId} = req.body;
             const {usuarioId} = req.body;
 
+            if(
+                !(await UniRentDataSource.getRepository(Usuario).exist({where : { id: Number.parseInt(usuarioId)}}))
+               ||
+                !(await UniRentDataSource.getRepository(Anuncio).exist({where : {id : Number.parseInt(anuncioId)}}))
+            ){
+                throw new Error(`Anuncio ou usuario não existem`)
+            }
             await UniRentDataSource.createQueryBuilder().
                 insert()
                 .into("lista_de_interesse")
@@ -43,8 +51,29 @@ export class UsuarioController {
         }catch (err){
             res.status(500).send(`Erro na operação de se interessar. ${err.message}`)
         }
+    }
 
+    public static async seDesinteressar(req: Request, res: Response){
+        try{
+            const {usuarioId} = req.body;
+            const {anuncioId} = req.body;
+            if(
+                !(await UniRentDataSource.getRepository(Usuario).exist({where : { id: usuarioId}}))
+            ){
+                throw new Error(`Usuario nao existe`)
+            }
 
+            await UniRentDataSource.createQueryBuilder()
+                .delete()
+                .from(`lista_de_interesse`)
+                .where("usuarioId=:id and anuncioId=:outroId", {id : Number.parseInt(usuarioId),outroId : Number.parseInt(anuncioId)})
+                .execute();
+
+            res.send();
+
+        }catch (err){
+            res.status(500).send(err);
+        }
     }
 
     public static async cadastrar(req: Request, res: Response) {
